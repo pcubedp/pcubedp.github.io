@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% if page.title %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+</head>
+<body>
+
+<!-- top-right: overflow button + theme toggle -->
+<div class="topbar">
+  <div class="ovf-wrap" id="ovf-wrap">
+    <canvas class="ovf-canvas" id="ovf-canvas"></canvas>
+    <a href="https://pcubedp.github.io/r1ft/"
+       target="_blank"
+       class="ovf-label"
+       id="ovf-label">0x000000...</a>
+  </div>
+  <button class="theme-btn" id="theme-btn" aria-label="Toggle theme">
+    <svg class="icon-moon" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/>
+    </svg>
+    <svg class="icon-sun" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <circle cx="12" cy="12" r="4.5"/>
+      <line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
+      <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
+      <line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
+    </svg>
+  </button>
+</div>
+
+<div class="container">
+
+  <header>
+    <div class="hdr-px"></div>
+    <div class="site-name">Parth Patel<span class="name-dot">.</span></div>
+    <div class="site-sub">CS student <span class="bullet">·</span> compilers <span class="bullet">·</span> systems <span class="bullet">·</span> the occasional rabbit hole</div>
+    <nav>
+      <a href="{{ '/' | relative_url }}"
+         class="{% if page.url == '/' %}active{% endif %}">home</a>
+      <a href="{{ '/projects/' | relative_url }}"
+         class="{% if page.url contains 'projects' %}active{% endif %}">projects</a>
+      <a href="{{ '/writing/' | relative_url }}"
+         class="{% if page.url contains 'writing' %}active{% endif %}">writing</a>
+      <a href="{{ '/about/' | relative_url }}"
+         class="{% if page.url contains 'about' %}active{% endif %}">about</a>
+      <div class="ndiv"></div>
+      <a href="https://github.com/{{ site.author.github }}" target="_blank">github ↗</a>
+    </nav>
+  </header>
+
+  {{ content }}
+
+  <footer>
+    <span class="foot-l">Parth Patel · pcubedp</span>
+    <div class="foot-r">
+      <a href="https://github.com/{{ site.author.github }}" target="_blank">github</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* ── theme ── */
+const root = document.documentElement;
+const saved = localStorage.getItem('theme') || 'light';
+root.setAttribute('data-theme', saved);
+document.getElementById('theme-btn').addEventListener('click', () => {
+  const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  root.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+});
+
+/* ── overflow shatter button ── */
+const wrap   = document.getElementById('ovf-wrap');
+const canvas = document.getElementById('ovf-canvas');
+const ctx    = canvas.getContext('2d');
+const lbl    = document.getElementById('ovf-label');
+const BW = 100, BH = 28;
+const CW = BW + 80, CH = BH + 60;
+canvas.width  = CW; canvas.height = CH;
+canvas.style.width = CW+'px'; canvas.style.height = CH+'px';
+canvas.style.left = -40+'px'; canvas.style.top = -20+'px';
+
+let hovering = false, frameT = 0, frags = [], lastSpawn = 0;
+
+function getC() {
+  const dark = root.getAttribute('data-theme') === 'dark';
+  return {
+    cy1: dark ? '#48b4e8' : '#1a7ec8',
+    cy2: dark ? '#2a9ad4' : '#0f9fc8',
+    fg:  dark ? '#e4e4f0' : '#111118',
+    dim: dark ? '#54546a' : '#6a6a78',
+  };
+}
+
+function hexStr(len) {
+  const h='0123456789abcdef'; let s='';
+  for(let i=0;i<len;i++) s+=h[Math.floor(Math.random()*16)];
+  return s;
+}
+
+const TEXTS=['0x000000...','0xdeadbeef','0xff4400','0x0000','null','0xc0ffee','0x41414141','>>>'];
+
+function spawnFrag(aggressive) {
+  const c = getC();
+  const colors = [c.cy1,c.cy1,c.cy2,c.fg,c.dim,c.cy1];
+  if (aggressive) {
+    const sc = 3 + Math.floor(Math.random()*5);
+    for(let i=0;i<sc;i++){
+      const sh = BH/sc;
+      frags.push({type:'slice',sliceY:20+i*sh,sliceH:sh+1,x:40,y:0,
+        vx:(Math.random()-.3)*5,vy:(Math.random()-.5)*3,
+        alpha:.8+Math.random()*.2,decay:.018+Math.random()*.025,
+        color:colors[Math.floor(Math.random()*colors.length)],
+        text:'0x000000...',size:9});
+    }
+    const oc = 4+Math.floor(Math.random()*6);
+    for(let i=0;i<oc;i++){
+      frags.push({type:'free',
+        x:20+Math.random()*60,y:20+Math.random()*BH,
+        vx:(Math.random()-.2)*6,vy:(Math.random()-.5)*4,
+        alpha:.6+Math.random()*.4,decay:.02+Math.random()*.03,
+        color:colors[Math.floor(Math.random()*colors.length)],
+        text:(Math.random()>.4?'0x':'')+hexStr(2+Math.floor(Math.random()*5)),
+        size:7+Math.random()*5});
+    }
+  } else {
+    const c2=getC();
+    frags.push({type:'free',
+      x:15+Math.random()*70,y:20+Math.random()*BH,
+      vx:(Math.random()-.3)*.6,vy:(Math.random()-.5)*.5,
+      alpha:.25+Math.random()*.25,decay:.004+Math.random()*.005,
+      color:Math.random()>.5?c2.cy1:c2.cy2,
+      text:TEXTS[Math.floor(Math.random()*TEXTS.length)],
+      size:7+Math.random()*3});
+  }
+}
+
+function draw() {
+  frameT++;
+  ctx.clearRect(0,0,CW,CH);
+  const si = hovering ? 4 : 40;
+  if(frameT-lastSpawn>si){ spawnFrag(hovering); lastSpawn=frameT; }
+  ctx.textBaseline='middle';
+  frags=frags.filter(f=>f.alpha>0.01);
+  frags.forEach(f=>{
+    f.x+=f.vx; f.y+=f.vy; f.alpha-=f.decay;
+    ctx.save();
+    ctx.globalAlpha=Math.max(0,f.alpha);
+    ctx.fillStyle=f.color;
+    ctx.font=`400 ${f.size}px "IBM Plex Mono",monospace`;
+    if(f.type==='slice'){
+      ctx.beginPath(); ctx.rect(0,f.sliceY,CW,f.sliceH); ctx.clip();
+    }
+    ctx.fillText(f.text,f.x,f.y);
+    ctx.restore();
+  });
+  requestAnimationFrame(draw);
+}
+
+wrap.addEventListener('mouseenter',()=>{
+  hovering=true; lbl.style.opacity='0';
+  for(let i=0;i<3;i++) spawnFrag(true);
+});
+wrap.addEventListener('mouseleave',()=>{ hovering=false; lbl.style.opacity='1'; });
+draw();
+</script>
+</body>
+</html>

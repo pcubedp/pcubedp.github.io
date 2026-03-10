@@ -1,0 +1,26 @@
+---
+layout: default
+title: projects
+permalink: /projects/
+---
+
+<div class="hero">
+  <div class="hero-eyebrow">projects</div>
+  <h1>Things I've built<em> or am building.</em></h1>
+</div>
+
+<div class="sec">all projects</div>
+
+<div class="projects">
+  {% for project in site.data.projects %}
+  <a href="{{ project.url }}" target="_blank" class="proj">
+    <div class="proj-lang">{{ project.lang }}</div>
+    <div class="proj-title">{{ project.name }}</div>
+    <div class="proj-desc">{{ project.desc }}</div>
+    <div class="proj-foot">
+      <span class="proj-link">github ↗</span>
+      <span class="proj-tag">{{ project.tag }}</span>
+    </div>
+  </a>
+  {% endfor %}
+</div>

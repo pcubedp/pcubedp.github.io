@@ -1,0 +1,34 @@
+---
+layout: default
+title: writing
+permalink: /writing/
+---
+
+<div class="hero">
+  <div class="hero-eyebrow">writing</div>
+  <h1>Notes on things<em> I'm figuring out.</em></h1>
+</div>
+
+<div class="sec">all posts</div>
+
+<div class="post-list">
+  {% for post in site.posts %}
+  <a href="{{ post.url | relative_url }}" class="post-item">
+    <div>
+      <div class="post-tag">{{ post.category }}</div>
+      <div class="post-title">{{ post.title }}</div>
+      <div class="post-exc">{{ post.excerpt | strip_html | truncatewords: 18 }}</div>
+    </div>
+    <div class="post-right">
+      <span class="post-date">{{ post.date | date: "%b %Y" }}</span>
+      <span class="post-arrow">→</span>
+    </div>
+  </a>
+  {% endfor %}
+
+  {% if site.posts.size == 0 %}
+  <div class="post-item" style="cursor:default;color:var(--dim);">
+    no posts yet. writing soon.
+  </div>
+  {% endif %}
+</div>

@@ -1,0 +1,29 @@
+# ─────────────────────────────────────────────
+# _config.yml — Parth Patel personal blog
+# ─────────────────────────────────────────────
+
+title: Parth Patel
+description: CS student. Compilers, systems, and things I find interesting.
+url: "https://pcubedp.github.io"
+baseurl: ""
+
+author:
+  name: Parth Patel
+  github: pcubedp
+  email: parth@example.com     # replace with real email
+
+# URL format for posts: /writing/post-title/
+permalink: /writing/:title/
+
+markdown: kramdown
+highlighter: rouge
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - node_modules

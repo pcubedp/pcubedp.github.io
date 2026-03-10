@@ -1,0 +1,23 @@
+- name: toy-compiler
+  lang: Rust
+  desc: Front-end compiler for a small expression language. Lexer, recursive descent parser, AST builder.
+  tag: compilers
+  url: https://github.com/pcubedp
+
+- name: ctf-toolkit
+  lang: Python
+  desc: Personal library of CTF scripts — RSA attacks, format string helpers, pwntools wrappers.
+  tag: security
+  url: https://github.com/pcubedp
+
+- name: malloc-impl
+  lang: C
+  desc: Custom heap allocator with free list coalescing. Deep dive into memory management internals.
+  tag: systems
+  url: https://github.com/pcubedp
+
+- name: lambda-calc
+  lang: Haskell
+  desc: Lambda calculus interpreter with beta reduction and Church encoding.
+  tag: PL theory
+  url: https://github.com/pcubedp

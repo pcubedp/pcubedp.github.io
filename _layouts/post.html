@@ -1,0 +1,17 @@
+---
+layout: default
+---
+
+<div class="post-page">
+
+  <a href="{{ '/writing/' | relative_url }}" class="back">← back</a>
+
+  <div class="det-tag">{{ page.category }}</div>
+  <h1 class="det-title">{{ page.title }}</h1>
+  <div class="det-meta">{{ page.date | date: "%b %Y" }}</div>
+
+  <div class="det-body">
+    {{ content }}
+  </div>
+
+</div>

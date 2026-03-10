@@ -1,0 +1,74 @@
+---
+layout: default
+title: ""
+permalink: /
+---
+
+<div class="hero">
+  <div class="hero-scatter"></div>
+  <div class="hero-eyebrow">portfolio &amp; writing</div>
+  <h1>
+    I'm Parth — I build compilers,<br>
+    poke at systems, and write about<br>
+    <em>whatever I'm figuring out.</em>
+  </h1>
+  <div class="hero-links">
+    <a href="https://github.com/{{ site.author.github }}" target="_blank" class="hero-link">github ↗</a>
+    <span class="hero-sep">·</span>
+    <a href="mailto:{{ site.author.email }}" class="hero-link">email ↗</a>
+    <span class="hero-sep">·</span>
+    <a href="{{ '/about/' | relative_url }}" class="hero-link">about →</a>
+  </div>
+</div>
+
+<div class="sec">featured projects</div>
+
+<div class="projects" style="margin-bottom:14px;">
+  {% for project in site.data.projects limit:2 %}
+  <a href="{{ project.url }}" target="_blank" class="proj">
+    <div class="proj-lang">{{ project.lang }}</div>
+    <div class="proj-title">{{ project.name }}</div>
+    <div class="proj-desc">{{ project.desc }}</div>
+    <div class="proj-foot">
+      <span class="proj-link">view →</span>
+      <span class="proj-tag">{{ project.tag }}</span>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+
+<div style="text-align:right;margin-bottom:52px;">
+  <a href="{{ '/projects/' | relative_url }}" class="all-link">all projects →</a>
+</div>
+
+<div class="sec">recent writing</div>
+
+<div class="post-list">
+  {% for post in site.posts limit:3 %}
+  <a href="{{ post.url | relative_url }}" class="post-item">
+    <div>
+      <div class="post-tag">{{ post.category }}</div>
+      <div class="post-title">{{ post.title }}</div>
+      <div class="post-exc">{{ post.excerpt | strip_html | truncatewords: 18 }}</div>
+    </div>
+    <div class="post-right">
+      <span class="post-date">{{ post.date | date: "%b %Y" }}</span>
+      <span class="post-arrow">→</span>
+    </div>
+  </a>
+  {% endfor %}
+
+  {% if site.posts.size == 0 %}
+  <div class="post-item" style="cursor:default;color:var(--dim);">
+    no posts yet. writing soon.
+  </div>
+  {% endif %}
+</div>
+
+<div class="astrip">
+  <p><strong>Parth Patel</strong> — CS student building compilers and learning systems from the ground up. I write to think clearly. Currently exploring PL theory and type systems.</p>
+  <div class="astrip-links">
+    <a href="https://github.com/{{ site.author.github }}" target="_blank" class="astrip-link">github ↗</a>
+    <a href="{{ '/about/' | relative_url }}" class="astrip-link">about →</a>
+  </div>
+</div>
