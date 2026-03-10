@@ -11,14 +11,25 @@
 </head>
 <body>
 
+<!-- full-screen segfault overlay -->
+<div id="hijack" style="display:none;position:fixed;inset:0;z-index:9999;background:#060a06;overflow:hidden;cursor:default;">
+  <canvas id="hijack-canvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+  <div id="hijack-ui" style="position:absolute;inset:0;font-family:'IBM Plex Mono',monospace;padding:clamp(24px,5vw,64px);pointer-events:none;">
+    <div id="hijack-header" style="font-size:11px;color:#33ff33;letter-spacing:.12em;text-transform:uppercase;margin-bottom:24px;opacity:0;transition:opacity .3s;">// process hijack — r1ft</div>
+    <div id="hijack-lines" style="font-size:13px;line-height:1.8;"></div>
+    <div id="hijack-bar" style="margin-top:24px;font-size:12px;color:#4ecdc4;opacity:0;letter-spacing:.04em;"></div>
+  </div>
+</div>
+<style>
+@keyframes hblink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes scan{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
+</style>
+
 <!-- top-right: overflow button + theme toggle -->
 <div class="topbar">
   <div class="ovf-wrap" id="ovf-wrap">
     <canvas class="ovf-canvas" id="ovf-canvas"></canvas>
-    <a href="https://pcubedp.github.io/r1ft/"
-       target="_blank"
-       class="ovf-label"
-       id="ovf-label">0x000000...</a>
+    <button onclick="startHijack()" class="ovf-label" id="ovf-label" style="background:none;border:1px solid var(--cyan-dim);cursor:pointer;width:100%;height:100%;font-family:inherit;font-size:10px;letter-spacing:.1em;color:var(--cyan);">// r1ft</button>
   </div>
   <button class="theme-btn" id="theme-btn" aria-label="Toggle theme">
     <svg class="icon-moon" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
@@ -105,7 +116,7 @@ function hexStr(len) {
   return s;
 }
 
-const TEXTS=['0x000000...','0xdeadbeef','0xff4400','0x0000','null','0xc0ffee','0x41414141','>>>'];
+const TEXTS=['// r1ft','0xdeadbeef','null ptr','seg_fault','0x4ec1a0','::writeups','::pwn','r1ft'];
 
 function spawnFrag(aggressive) {
   const c = getC();
@@ -118,7 +129,7 @@ function spawnFrag(aggressive) {
         vx:(Math.random()-.3)*5,vy:(Math.random()-.5)*3,
         alpha:.8+Math.random()*.2,decay:.018+Math.random()*.025,
         color:colors[Math.floor(Math.random()*colors.length)],
-        text:'0x000000...',size:9});
+        text:'0x000000',size:9});
     }
     const oc = 4+Math.floor(Math.random()*6);
     for(let i=0;i<oc;i++){
@@ -135,7 +146,7 @@ function spawnFrag(aggressive) {
     frags.push({type:'free',
       x:15+Math.random()*70,y:20+Math.random()*BH,
       vx:(Math.random()-.3)*.6,vy:(Math.random()-.5)*.5,
-      alpha:.25+Math.random()*.25,decay:.004+Math.random()*.005,
+      alpha:.45+Math.random()*.3,decay:.003+Math.random()*.004,
       color:Math.random()>.5?c2.cy1:c2.cy2,
       text:TEXTS[Math.floor(Math.random()*TEXTS.length)],
       size:7+Math.random()*3});
@@ -170,6 +181,119 @@ wrap.addEventListener('mouseenter',()=>{
 });
 wrap.addEventListener('mouseleave',()=>{ hovering=false; lbl.style.opacity='1'; });
 draw();
+
+/* ── segfault hijack transition ── */
+function startHijack() {
+  const overlay  = document.getElementById('hijack');
+  const linesDiv = document.getElementById('hijack-lines');
+  const hdr      = document.getElementById('hijack-header');
+  const bar      = document.getElementById('hijack-bar');
+  const hc       = document.getElementById('hijack-canvas');
+  const TARGET   = 'https://pcubedp.github.io/r1ft/';
+
+  overlay.style.display = 'block';
+  overlay.style.opacity = '1';
+  linesDiv.innerHTML = '';
+  bar.style.opacity = '0';
+  bar.textContent = '';
+  hdr.style.opacity = '0';
+
+  // ── background rain canvas ──
+  hc.width  = window.innerWidth;
+  hc.height = window.innerHeight;
+  const hctx = hc.getContext('2d');
+  const cols  = Math.floor(hc.width / 14);
+  const drops = Array.from({length:cols}, () => Math.random() * -50);
+  const chars  = '01アイウエオカキクrxpwn{}[]//\\><!=;'.split('');
+  let rainRunning = true;
+
+  function drawRain() {
+    if (!rainRunning) return;
+    hctx.fillStyle = 'rgba(6,10,6,0.13)';
+    hctx.fillRect(0, 0, hc.width, hc.height);
+    hctx.font = '11px "IBM Plex Mono", monospace';
+    drops.forEach((y, i) => {
+      const ch = chars[Math.floor(Math.random() * chars.length)];
+      const bright = Math.random() > 0.97;
+      hctx.fillStyle = bright ? '#aaffaa' : (Math.random() > 0.8 ? '#1a4d1a' : '#0f3a0f');
+      hctx.fillText(ch, i * 14, y * 14);
+      if (y * 14 > hc.height && Math.random() > 0.975) drops[i] = 0;
+      else drops[i] += 0.4 + Math.random() * 0.3;
+    });
+    requestAnimationFrame(drawRain);
+  }
+  drawRain();
+
+  // ── terminal lines ──
+  function addLine(text, color, dim) {
+    const el = document.createElement('div');
+    el.textContent = text;
+    el.style.color = dim ? '#1a6b1a' : (color || '#33ff33');
+    if (dim) el.style.opacity = '.6';
+    linesDiv.appendChild(el);
+  }
+
+  function addBlank() { linesDiv.appendChild(document.createElement('br')); }
+
+  // show header
+  setTimeout(() => { hdr.style.opacity = '1'; }, 80);
+
+  const seq = [
+    [100,  () => addLine('> SIGSEGV — caught by r1ft handler')],
+    [260,  () => addLine('> dumping memory map...')],
+    [420,  () => addBlank()],
+    [440,  () => addLine('  ADDR            PERMS   REGION', null, true)],
+    [460,  () => addLine('  0x00400000      r-xp    [binary]', null, true)],
+    [480,  () => addLine('  0x7ffd2a4e1000  rwxp    [stack]', null, true)],
+    [500,  () => addLine('  0x4ec1a000      r-xp    [r1ft::core]', '#4ecdc4')],
+    [520,  () => addLine('  0x4ec2b000      r-xp    [r1ft::writeups]', '#4ecdc4')],
+    [540,  () => addBlank()],
+    [600,  () => addLine('> attaching to r1ft::core...')],
+    [800,  () => addLine('> ptrace(PTRACE_ATTACH) — ok')],
+    [940,  () => addLine('> injecting trampoline at 0x4ec1a048')],
+    [1060, () => addBlank()],
+    [1080, () => {
+      bar.style.opacity = '1';
+      let p = 0;
+      const iv = setInterval(() => {
+        p += Math.floor(Math.random()*9)+4;
+        if (p >= 100) { p = 100; clearInterval(iv); }
+        const filled = Math.floor(p/5);
+        bar.textContent = '> [' + '█'.repeat(filled) + '·'.repeat(20-filled) + ']  ' + p + '%';
+      }, 40);
+    }],
+    [1500, () => {
+      addBlank();
+      addLine('> hijack complete — launching r1ft', '#4ecdc4');
+    }],
+    [1700, () => {
+      // glitch flash
+      rainRunning = false;
+      let f = 0;
+      const fl = setInterval(() => {
+        overlay.style.background = f%2===0 ? '#00ff0022' : '#060a06';
+        if(++f >= 5) {
+          clearInterval(fl);
+          overlay.style.background = '#060a06';
+          window.open(TARGET, '_blank');
+          // fade out
+          overlay.style.transition = 'opacity 0.5s';
+          overlay.style.opacity = '0';
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            overlay.style.opacity = '1';
+            overlay.style.transition = '';
+            linesDiv.innerHTML = '';
+            hctx.clearRect(0,0,hc.width,hc.height);
+          }, 500);
+        }
+      }, 55);
+    }],
+  ];
+
+  seq.forEach(([t, fn]) => setTimeout(fn, t));
+}
+
 </script>
 </body>
 </html>
